@@ -1,7 +1,9 @@
 /*
+ * Alexander Tang + Craig Perkins
  * tokenizer.c
  */
 #include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
@@ -31,11 +33,11 @@ typedef struct TokenizerT_ TokenizerT;
 TokenizerT *TKCreate(char *separators, char *ts) {
   /*TODO check for edge cases*/
 
-  TokenizerT *tok;
-  tok->delimiters = separators;
-  tok->tokenStream = ts;
+  TokenizerT *tokenizer;
+  tokenizer->delimiters = separators;
+  tokenizer->tokenStream = ts;
 
-  return tok;
+  return tokenizer;
 }
 
 /*
@@ -61,8 +63,45 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
+  char *token;
+  char *p, *d;
+  p = tk->tokenStream;
+  d = tk->delimiters;
 
-  return NULL;
+  printf(":::\n%s %s\n:::\n", p, d);
+
+  int s = 0;
+
+  while (*p != *d)
+  {
+    printf("%s\n", p);
+    p++;
+    s++;
+  }
+
+  printf("%d\n", s);
+
+  token = (char *)malloc(s);
+
+  p = p - s;
+  int i;
+  for (i = 0; i < s; i++)
+  {
+    *token = *p;
+    token++;
+    p++;
+  }
+
+  printf("\n\n%d %s\n\n", s, token);
+
+
+
+
+
+
+
+
+  return 0;
 }
 
 /*
@@ -79,21 +118,18 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  TokenizerT *tok;
-  tok = TKCreate(argv[1], argv[2]);
+  TokenizerT *tokenizer;
+  tokenizer = TKCreate(argv[1], argv[2]);
 
-  printf("%s %s\n", tok->delimiters, tok->tokenStream);
+  printf("\"%s\" \"%s\"\n", tokenizer->delimiters, tokenizer->tokenStream);
 
+  char *token;
+  while ( token = TKGetNextToken(tokenizer) )
+  {
+    printf("%s\n", token);
+  }
 
-
-
-
-
-  /*int i;*/
-  /*for (i = 0; i < argc; i++)*/
-  /*{*/
-    /*printf("argv[%d] %s %s\n", i, argv[i], argv[i]);*/
-  /*}*/
+  TKDestroy(tokenizer);
 
   return 0;
 }
