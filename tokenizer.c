@@ -8,6 +8,8 @@
  */
 
 struct TokenizerT_ {
+  char *delimiters;
+  char *tokenStream;
 };
 
 typedef struct TokenizerT_ TokenizerT;
@@ -27,8 +29,13 @@ typedef struct TokenizerT_ TokenizerT;
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
+  /*TODO check for edge cases*/
 
-  return NULL;
+  TokenizerT *tok;
+  tok->delimiters = separators;
+  tok->tokenStream = ts;
+
+  return tok;
 }
 
 /*
@@ -69,7 +76,24 @@ char *TKGetNextToken(TokenizerT *tk) {
 int main(int argc, char **argv) {
   if (argc < 3) {
     fprintf(stderr, "Need more arguments\n");
+    return 0;
   }
+
+  TokenizerT *tok;
+  tok = TKCreate(argv[1], argv[2]);
+
+  printf("%s %s\n", tok->delimiters, tok->tokenStream);
+
+
+
+
+
+
+  /*int i;*/
+  /*for (i = 0; i < argc; i++)*/
+  /*{*/
+    /*printf("argv[%d] %s %s\n", i, argv[i], argv[i]);*/
+  /*}*/
 
   return 0;
 }
