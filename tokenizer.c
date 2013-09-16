@@ -1,17 +1,20 @@
 /*
- * Alexander Tang + Craig Perkins
  * tokenizer.c
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
  */
 
 struct TokenizerT_ {
+
   char *delimiters;
   char *tokenStream;
+  char **tokens;
+
 };
 
 typedef struct TokenizerT_ TokenizerT;
@@ -31,11 +34,47 @@ typedef struct TokenizerT_ TokenizerT;
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
-  /*TODO check for edge cases*/
 
-  TokenizerT *tokenizer;
+  TokenizerT *tokenizer = (TokenizerT *)malloc((strlen(separators)+strlen(ts))*sizeof(char));
   tokenizer->delimiters = separators;
   tokenizer->tokenStream = ts;
+
+  char *tokenizedString = (char *)malloc(strlen(ts) * sizeof(char));
+  strcpy(tokenizedString, ts);
+
+  tokenizer->tokens = (char **)malloc(strlen(ts));
+
+  size_t length = strlen(ts);
+  while (*(tokenizer->delimiters) != '\0') {
+    int i;
+    for(i = 0; i < length; i++) {
+      if (tokenizedString[i] == *(tokenizer->delimiters)) {
+        tokenizedString[i] = '\0';
+      }
+
+    }
+    tokenizer->delimiters++;
+  }
+
+  char *ptr = tokenizedString;
+  int j = 0;
+
+  int i;
+  for (i = 0; i < length+1; i++) {
+
+    while (*ptr == '\0') {
+      ptr++;
+      i++;
+    }
+
+    if (tokenizedString[i] == '\0') {
+      (tokenizer->tokens)[j] = ptr;
+      ptr+=strlen(ptr);
+      j++;
+    }
+  }
+
+  free(tokenizedString);
 
   return tokenizer;
 }
@@ -48,6 +87,9 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
+
+  free(tk);
+
 }
 
 /*
@@ -63,45 +105,9 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
-  char *token;
-  char *p, *d;
-  p = tk->tokenStream;
-  d = tk->delimiters;
 
-  printf(":::\n%s %s\n:::\n", p, d);
+  return *tk->tokens++;
 
-  int s = 0;
-
-  while (*p != *d)
-  {
-    printf("%s\n", p);
-    p++;
-    s++;
-  }
-
-  printf("%d\n", s);
-
-  token = (char *)malloc(s);
-
-  p = p - s;
-  int i;
-  for (i = 0; i < s; i++)
-  {
-    *token = *p;
-    token++;
-    p++;
-  }
-
-  printf("\n\n%d %s\n\n", s, token);
-
-
-
-
-
-
-
-
-  return 0;
 }
 
 /*
@@ -113,23 +119,30 @@ char *TKGetNextToken(TokenizerT *tk) {
  */
 
 int main(int argc, char **argv) {
+
   if (argc < 3) {
-    fprintf(stderr, "Need more arguments\n");
-    return 0;
+    fprintf(stderr, "Too few => error\n");
+    return -1;
+  } else if (argc >3) {
+    fprintf(stderr, "Too many => error\n");
+    return -1;
   }
+
+  printf("Input: \"%s\" \"%s\"\n", argv[1], argv[2]);
 
   TokenizerT *tokenizer;
   tokenizer = TKCreate(argv[1], argv[2]);
 
-  printf("\"%s\" \"%s\"\n", tokenizer->delimiters, tokenizer->tokenStream);
-
   char *token;
-  while ( token = TKGetNextToken(tokenizer) )
+
+  while ( (token = TKGetNextToken(tokenizer)) )
   {
     printf("%s\n", token);
   }
 
+
   TKDestroy(tokenizer);
 
   return 0;
+
 }
