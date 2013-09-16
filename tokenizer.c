@@ -160,6 +160,24 @@ int main(int argc, char **argv) {
   TokenizerT *tokenizer;
   tokenizer = TKCreate(argv[1], argv[2]);
 
+  if (strcmp(argv[1], "") == 0) {
+    char *str = preprocessString(tokenizer->tokenStream);
+    size_t length = strlen(str);
+
+    int i;
+    for (i = 0; i < length; i++) {
+      char c = str[i];
+      if (c == '\n' || c == '\v' || c == '\t' || c == '\b' ||
+          c == '\r' || c == '\f' || c == '\a' || c == '\"' || c == '\\') {
+        printf("[0x%.2x]", c);
+      } else {
+        printf("%c", c);
+      }
+    }
+    printf("\n");
+    return 0;
+  }
+
   char *token;
   while ( (token = TKGetNextToken(tokenizer)) ) {
     printf("Output: %s\n", token);
