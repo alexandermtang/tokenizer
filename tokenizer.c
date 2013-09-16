@@ -48,21 +48,24 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
 
   // TODO need to process tempDelimiters for special characters like '\n'
+  int i;
+  for(i = 0; i < sepLength; i++) {
 
-  while (*tempDelimiters != '\0') {
-    printf("Delimiter: %c\n", *tempDelimiters);
-    int i;
-    for(i = 0; i < tsLength; i++) {
-      if (tokenizedString[i] == *tempDelimiters) {
-        tokenizedString[i] = '\0';
+
+  }
+
+  for(i = 0; i < sepLength; i++) {
+    printf("Delimiter: %c\n", tempDelimiters[i]);
+    int j;
+    for(j = 0; j < tsLength; j++) {
+      if (tokenizedString[j] == tempDelimiters[i]) {
+        tokenizedString[j] = '\0';
       }
     }
-    tempDelimiters++;
   }
 
   char *ptr = tokenizedString;
   int j = 0;
-  int i = 0;
   for (i = 0; i < tsLength + 1; i++) {
     while (*ptr == '\0') {
       ptr++;
@@ -130,8 +133,7 @@ int main(int argc, char **argv) {
   tokenizer = TKCreate(argv[1], argv[2]);
 
   char *token;
-  while ( (token = TKGetNextToken(tokenizer)) )
-  {
+  while ( (token = TKGetNextToken(tokenizer)) ) {
     printf("Output: %s\n", token);
   }
 
@@ -139,7 +141,7 @@ int main(int argc, char **argv) {
   printf("Token Stream: %s\n", tokenizer->tokenStream);
 
   // Used for debug purposes
-  char c = '\\';
+  char c = '\"';
   printf("%c [0x%.2x]", c, c);
 
   TKDestroy(tokenizer);
