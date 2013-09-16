@@ -48,6 +48,14 @@ char *preprocessString(char *str) {
   return str;
 }
 
+int isSpecialChar(char c) {
+  if (c == '\n' || c == '\v' || c == '\t' || c == '\b' ||
+      c == '\r' || c == '\f' || c == '\a' || c == '\"' || c == '\\') {
+    return 1;
+  }
+  return 0;
+}
+
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
  * characters (given as a string) and a token stream (given as a string).
@@ -83,7 +91,13 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 
   int i;
   for(i = 0; i < sepLength; i++) {
-    printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
+
+    if (isSpecialChar(tempDelimiters[i])) {
+      printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
+    } else {
+      printf("Delimiter: %c\n", tempDelimiters[i]);
+    }
+
     int j;
     for(j = 0; j < tsLength; j++) {
       if (tokenizedString[j] == tempDelimiters[i]) {
@@ -167,8 +181,7 @@ int main(int argc, char **argv) {
     int i;
     for (i = 0; i < length; i++) {
       char c = str[i];
-      if (c == '\n' || c == '\v' || c == '\t' || c == '\b' ||
-          c == '\r' || c == '\f' || c == '\a' || c == '\"' || c == '\\') {
+      if (isSpecialChar(c)) {
         printf("[0x%.2x]", c);
       } else {
         printf("%c", c);
