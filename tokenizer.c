@@ -17,6 +17,37 @@ struct TokenizerT_ {
 
 typedef struct TokenizerT_ TokenizerT;
 
+// processes string, replaces "\n" with '\n' and '\0'
+char *preprocessString(char *str) {
+  size_t length = strlen(str);
+  int i;
+  for (i = 0; i < length; i++) {
+    if (str[i] == '\\') {
+      switch (str[i+1]) {
+        case 'n': str[i] = '\n'; str[i+1] = '\0';
+          break;
+        case 't': str[i] = '\t'; str[i+1] = '\0';
+          break;
+        case 'v': str[i] = '\v'; str[i+1] = '\0';
+          break;
+        case 'b': str[i] = '\b'; str[i+1] = '\0';
+          break;
+        case 'r': str[i] = '\r'; str[i+1] = '\0';
+          break;
+        case 'f': str[i] = '\f'; str[i+1] = '\0';
+          break;
+        case '\\': str[i] = '\\'; str[i+1] = '\0';
+          break;
+        case 'a': str[i] = '\a'; str[i+1] = '\0';
+          break;
+        case '"': str[i] = '\"'; str[i+1] = '\0';
+          break;
+      }
+    }
+  }
+  return str;
+}
+
 /*
  * TKCreate creates a new TokenizerT object for a given set of separator
  * characters (given as a string) and a token stream (given as a string).
@@ -47,15 +78,12 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 
   tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
 
-  // TODO need to process tempDelimiters for special characters like '\n'
+  tempDelimiters = preprocessString(tempDelimiters);
+  tokenizedString = preprocessString(tokenizedString);
+
   int i;
   for(i = 0; i < sepLength; i++) {
-
-
-  }
-
-  for(i = 0; i < sepLength; i++) {
-    printf("Delimiter: %c\n", tempDelimiters[i]);
+    printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
     int j;
     for(j = 0; j < tsLength; j++) {
       if (tokenizedString[j] == tempDelimiters[i]) {
@@ -139,10 +167,6 @@ int main(int argc, char **argv) {
 
   printf("Delimiters: %s\n", tokenizer->delimiters);
   printf("Token Stream: %s\n", tokenizer->tokenStream);
-
-  // Used for debug purposes
-  char c = '\"';
-  printf("%c [0x%.2x]", c, c);
 
   TKDestroy(tokenizer);
   return 0;
