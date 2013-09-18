@@ -1,10 +1,10 @@
 /*
+ * Alexander Tang and Craig Perkins
  * tokenizer.c
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <memory.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
@@ -43,8 +43,6 @@ char *preprocessString(char *str) {
           break;
         case '"': str[i] = '\"'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-          //default: memmove(str+i, str+i+1, strlen(str+i)*sizeof(char));
-          //break;
       }
     }
   }
@@ -80,14 +78,13 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   TokenizerT *tokenizer  = (TokenizerT *)malloc((sepLength + tsLength) * sizeof(char));
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
+  tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
 
   char *tokenizedString = (char *)malloc(tsLength * sizeof(char));
   strcpy(tokenizedString, ts);
 
   char *tempDelimiters  = (char *)malloc(sepLength * sizeof(char));
   strcpy(tempDelimiters, separators);
-
-  tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
 
   tempDelimiters  = preprocessString(tempDelimiters);
   tokenizedString = preprocessString(tokenizedString);
@@ -96,7 +93,6 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 
   int i = 0;
   while (tempDelimiters[i] != '\0') {
-
     if (isSpecialChar(tempDelimiters[i])) {
       printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
     } else {
@@ -127,8 +123,6 @@ TokenizerT *TKCreate(char *separators, char *ts) {
       j++;
     }
   }
-
-  free(tokenizedString);
 
   return tokenizer;
 }
@@ -181,25 +175,6 @@ int main(int argc, char **argv) {
 
   TokenizerT *tokenizer;
   tokenizer = TKCreate(argv[1], argv[2]);
-
-  /*
-   if (strcmp(argv[1], "") == 0) {
-   char *str = preprocessString(tokenizer->tokenStream);
-   size_t length = strlen(str);
-
-   int i;
-   for (i = 0; i < length; i++) {
-   char c = str[i];
-   if (isSpecialChar(c)) {
-   printf("[0x%.2x]", c);
-   } else {
-   printf("%c", c);
-   }
-   }
-   printf("\n");
-   return 0;
-   }
-   */
 
   char *token;
   while ( (token = TKGetNextToken(tokenizer)) ) {
