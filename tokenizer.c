@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <memory.h>
 
 /*
  * Tokenizer type.  You need to fill in the type as part of your implementation.
@@ -24,24 +25,26 @@ char *preprocessString(char *str) {
   for (i = 0; i < length; i++) {
     if (str[i] == '\\') {
       switch (str[i+1]) {
-        case 'n': str[i] = '\n'; str[i+1] = '\0';
+        case 'n': str[i] = '\n'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 't': str[i] = '\t'; str[i+1] = '\0';
+        case 't': str[i] = '\t'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 'v': str[i] = '\v'; str[i+1] = '\0';
+        case 'v': str[i] = '\v'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 'b': str[i] = '\b'; str[i+1] = '\0';
+        case 'b': str[i] = '\b'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 'r': str[i] = '\r'; str[i+1] = '\0';
+        case 'r': str[i] = '\r'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 'f': str[i] = '\f'; str[i+1] = '\0';
+        case 'f': str[i] = '\f'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case '\\': str[i] = '\\'; str[i+1] = '\0';
+        case '\\': str[i] = '\\'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case 'a': str[i] = '\a'; str[i+1] = '\0';
+        case 'a': str[i] = '\a'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
-        case '"': str[i] = '\"'; str[i+1] = '\0';
+        case '"': str[i] = '\"'; memmove(str+i+1, str+i+2, strlen(str+i+1)*sizeof(char)); length--;
           break;
+          //default: memmove(str+i, str+i+1, strlen(str+i)*sizeof(char));
+          //break;
       }
     }
   }
@@ -72,25 +75,27 @@ int isSpecialChar(char c) {
 
 TokenizerT *TKCreate(char *separators, char *ts) {
   size_t sepLength = strlen(separators);
-  size_t tsLength = strlen(ts);
+  size_t tsLength  = strlen(ts);
 
-  TokenizerT *tokenizer = (TokenizerT *)malloc((sepLength + tsLength) * sizeof(char));
-  tokenizer->delimiters = separators;
+  TokenizerT *tokenizer  = (TokenizerT *)malloc((sepLength + tsLength) * sizeof(char));
+  tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
 
   char *tokenizedString = (char *)malloc(tsLength * sizeof(char));
   strcpy(tokenizedString, ts);
 
-  char *tempDelimiters = (char *)malloc(sepLength * sizeof(char));
+  char *tempDelimiters  = (char *)malloc(sepLength * sizeof(char));
   strcpy(tempDelimiters, separators);
 
   tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
 
-  tempDelimiters = preprocessString(tempDelimiters);
+  tempDelimiters  = preprocessString(tempDelimiters);
   tokenizedString = preprocessString(tokenizedString);
 
-  int i;
-  for(i = 0; i < sepLength; i++) {
+  tsLength = strlen(tokenizedString);
+
+  int i = 0;
+  while (tempDelimiters[i] != '\0') {
 
     if (isSpecialChar(tempDelimiters[i])) {
       printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
@@ -104,9 +109,12 @@ TokenizerT *TKCreate(char *separators, char *ts) {
         tokenizedString[j] = '\0';
       }
     }
+
+    i++;
   }
 
   char *ptr = tokenizedString;
+
   int j = 0;
   for (i = 0; i < tsLength + 1; i++) {
     while (*ptr == '\0') {
@@ -174,26 +182,41 @@ int main(int argc, char **argv) {
   TokenizerT *tokenizer;
   tokenizer = TKCreate(argv[1], argv[2]);
 
-  if (strcmp(argv[1], "") == 0) {
-    char *str = preprocessString(tokenizer->tokenStream);
-    size_t length = strlen(str);
+  /*
+   if (strcmp(argv[1], "") == 0) {
+   char *str = preprocessString(tokenizer->tokenStream);
+   size_t length = strlen(str);
+
+   int i;
+   for (i = 0; i < length; i++) {
+   char c = str[i];
+   if (isSpecialChar(c)) {
+   printf("[0x%.2x]", c);
+   } else {
+   printf("%c", c);
+   }
+   }
+   printf("\n");
+   return 0;
+   }
+   */
+
+  char *token;
+  while ( (token = TKGetNextToken(tokenizer)) ) {
+    printf("Output: ");
+    size_t length = strlen(token);
 
     int i;
     for (i = 0; i < length; i++) {
-      char c = str[i];
+      char c = token[i];
       if (isSpecialChar(c)) {
         printf("[0x%.2x]", c);
       } else {
         printf("%c", c);
       }
     }
-    printf("\n");
-    return 0;
-  }
 
-  char *token;
-  while ( (token = TKGetNextToken(tokenizer)) ) {
-    printf("Output: %s\n", token);
+    printf("\n");
   }
 
   printf("Delimiters: %s\n", tokenizer->delimiters);
