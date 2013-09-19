@@ -93,11 +93,11 @@ TokenizerT *TKCreate(char *separators, char *ts) {
 
   int i = 0;
   while (tempDelimiters[i] != '\0') {
-    if (isSpecialChar(tempDelimiters[i])) {
-      printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);
-    } else {
-      printf("Delimiter: %c\n", tempDelimiters[i]);
-    }
+    /*if (isSpecialChar(tempDelimiters[i])) {*/
+      /*printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);*/
+    /*} else {*/
+      /*printf("Delimiter: %c\n", tempDelimiters[i]);*/
+    /*}*/
 
     int j;
     for(j = 0; j < tsLength; j++) {
@@ -171,14 +171,14 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  printf("Input: \"%s\" \"%s\"\n", argv[1], argv[2]);
+  /*printf("Input: \"%s\" \"%s\"\n", argv[1], argv[2]);*/
 
   TokenizerT *tokenizer;
   tokenizer = TKCreate(argv[1], argv[2]);
 
   char *token;
   while ( (token = TKGetNextToken(tokenizer)) ) {
-    printf("Output: ");
+    /*printf("Output: ");*/
     size_t length = strlen(token);
 
     int i;
@@ -194,8 +194,8 @@ int main(int argc, char **argv) {
     printf("\n");
   }
 
-  printf("Delimiters: %s\n", tokenizer->delimiters);
-  printf("Token Stream: %s\n", tokenizer->tokenStream);
+  /*printf("Delimiters: %s\n", tokenizer->delimiters);*/
+  /*printf("Token Stream: %s\n", tokenizer->tokenStream);*/
 
   TKDestroy(tokenizer);
   return 0;
