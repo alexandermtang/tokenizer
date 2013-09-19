@@ -52,11 +52,8 @@ char *preprocessString(char *str) {
 }
 
 int isSpecialChar(char c) {
-  if (c == '\n' || c == '\v' || c == '\t' || c == '\b' ||
-      c == '\r' || c == '\f' || c == '\a' || c == '\"' || c == '\\') {
-    return 1;
-  }
-  return 0;
+  return (c == '\n' || c == '\v' || c == '\t' || c == '\b' ||
+      c == '\r' || c == '\f' || c == '\a' || c == '\"' || c == '\\');
 }
 
 /*
@@ -82,7 +79,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   TokenizerT *tokenizer  = (TokenizerT *)malloc(tokenizerSize);
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
-  tokenizer->tokens = (char **)calloc(tsLength, sizeof(char));
+  tokenizer->tokens = (char **)calloc(tsLength, sizeof(char*));
   tokenizer->numTokens = 0;
   tokenizer->numTokensDispensed = 0;
 
@@ -176,6 +173,11 @@ int main(int argc, char **argv) {
   } else if (argc > 3) {
     fprintf(stderr, "Too many => error\n");
     return -1;
+  }
+
+  // return if argv[2] is empty
+  if (strcmp(argv[2], "") == 0) {
+    return 0;
   }
 
   /*printf("Input: \"%s\" \"%s\"\n", argv[1], argv[2]);*/
