@@ -14,6 +14,8 @@ struct TokenizerT_ {
   char *delimiters;
   char *tokenStream;
   char **tokens;
+  int numTokens;
+  int numTokensDispensed;
 };
 
 typedef struct TokenizerT_ TokenizerT;
@@ -79,12 +81,14 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
   tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
-
-  char *tokenizedString = (char *)malloc(tsLength * sizeof(char));
-  strcpy(tokenizedString, ts);
+  tokenizer->numTokens = 0;
+  tokenizer->numTokensDispensed = 0;
 
   char *tempDelimiters  = (char *)malloc(sepLength * sizeof(char));
   strcpy(tempDelimiters, separators);
+
+  char *tokenizedString = (char *)malloc(tsLength * sizeof(char));
+  strcpy(tokenizedString, ts);
 
   tempDelimiters  = preprocessString(tempDelimiters);
   tokenizedString = preprocessString(tokenizedString);
@@ -92,12 +96,10 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   tsLength = strlen(tokenizedString);
 
   int i = 0;
-  while (tempDelimiters[i] != '\0') {
-    /*if (isSpecialChar(tempDelimiters[i])) {*/
-      /*printf("Delimiter: [0x%.2x]\n", tempDelimiters[i]);*/
-    /*} else {*/
-      /*printf("Delimiter: %c\n", tempDelimiters[i]);*/
-    /*}*/
+  for (i = 0; i < sepLength; i++) {
+    if (tempDelimiters[i] == '\0') {
+      continue;
+    }
 
     int j;
     for(j = 0; j < tsLength; j++) {
@@ -105,12 +107,9 @@ TokenizerT *TKCreate(char *separators, char *ts) {
         tokenizedString[j] = '\0';
       }
     }
-
-    i++;
   }
 
   char *ptr = tokenizedString;
-
   int j = 0;
   for (i = 0; i < tsLength + 1; i++) {
     while (*ptr == '\0') {
@@ -119,6 +118,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
     }
     if (tokenizedString[i] == '\0') {
       (tokenizer->tokens)[j] = ptr;
+      tokenizer->numTokens++;
       ptr+=strlen(ptr);
       j++;
     }
@@ -151,7 +151,12 @@ void TKDestroy(TokenizerT *tk) {
  */
 
 char *TKGetNextToken(TokenizerT *tk) {
-  return *tk->tokens++;
+  if (tk->numTokensDispensed < tk->numTokens) {
+    tk->numTokensDispensed++;
+    return *tk->tokens++;
+  } else {
+    return 0;
+  }
 }
 
 /*
@@ -180,6 +185,7 @@ int main(int argc, char **argv) {
   while ( (token = TKGetNextToken(tokenizer)) ) {
     /*printf("Output: ");*/
     size_t length = strlen(token);
+    /*printf("token: %s %zu", token, length);*/
 
     int i;
     for (i = 0; i < length; i++) {
