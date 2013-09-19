@@ -74,10 +74,11 @@ int isSpecialChar(char c) {
  */
 
 TokenizerT *TKCreate(char *separators, char *ts) {
-  size_t sepLength = strlen(separators);
-  size_t tsLength  = strlen(ts);
+  size_t sepLength = strlen(separators) + 1; // +1 to include \0 at end of string
+  size_t tsLength  = strlen(ts) + 1;
 
-  size_t tokenizerSize = (sepLength + 2*tsLength) * sizeof(char) + 2*sizeof(int);
+  // 2*sizeof(int) to make space for numTokens and numTokensDispensed
+  size_t tokenizerSize = (sepLength + tsLength)*sizeof(char) + tsLength*sizeof(char*) + 2*sizeof(int);
   TokenizerT *tokenizer  = (TokenizerT *)malloc(tokenizerSize);
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
@@ -204,7 +205,6 @@ int main(int argc, char **argv) {
   /*printf("Delimiters: %s\n", tokenizer->delimiters);*/
   /*printf("Token Stream: %s\n", tokenizer->tokenStream);*/
 
-  /*printf("%zu", sizeof(int));*/
   TKDestroy(tokenizer);
   return 0;
 }
