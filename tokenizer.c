@@ -77,17 +77,18 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   size_t sepLength = strlen(separators);
   size_t tsLength  = strlen(ts);
 
-  TokenizerT *tokenizer  = (TokenizerT *)malloc((sepLength + tsLength) * sizeof(char));
+  size_t tokenizerSize = (sepLength + 2*tsLength) * sizeof(char) + 2*sizeof(int);
+  TokenizerT *tokenizer  = (TokenizerT *)malloc(tokenizerSize);
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
-  tokenizer->tokens = (char **)malloc(tsLength * sizeof(char));
+  tokenizer->tokens = (char **)calloc(tsLength, sizeof(char));
   tokenizer->numTokens = 0;
   tokenizer->numTokensDispensed = 0;
 
-  char *tempDelimiters  = (char *)malloc(sepLength * sizeof(char));
+  char *tempDelimiters  = (char *)calloc(sepLength, sizeof(char));
   strcpy(tempDelimiters, separators);
 
-  char *tokenizedString = (char *)malloc(tsLength * sizeof(char));
+  char *tokenizedString = (char *)calloc(tsLength, sizeof(char));
   strcpy(tokenizedString, ts);
 
   tempDelimiters  = preprocessString(tempDelimiters);
@@ -203,6 +204,7 @@ int main(int argc, char **argv) {
   /*printf("Delimiters: %s\n", tokenizer->delimiters);*/
   /*printf("Token Stream: %s\n", tokenizer->tokenStream);*/
 
+  /*printf("%zu", sizeof(int));*/
   TKDestroy(tokenizer);
   return 0;
 }
