@@ -115,6 +115,7 @@ TokenizerT *TKCreate(char *separators, char *ts) {
     }
     if (tokenizedString[i] == '\0') {
       tokenizer->numTokens++;
+      ptr+=strlen(ptr);
     }
   }
 
