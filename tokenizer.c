@@ -13,6 +13,7 @@
 struct TokenizerT_ {
   char *delimiters;
   char *tokenStream;
+  char *tokenizedString;
   char **tokens;
   int numTokens;
   int numTokensDispensed;
@@ -74,19 +75,17 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   size_t sepLength = strlen(separators) + 1; // +1 to include \0 at end of string
   size_t tsLength  = strlen(ts) + 1;
 
-  // 2*sizeof(int) to make space for numTokens and numTokensDispensed
-  size_t tokenizerSize = (sepLength + tsLength)*sizeof(char) + tsLength*sizeof(char*) + 2*sizeof(int);
-  TokenizerT *tokenizer  = (TokenizerT *)malloc(tokenizerSize);
+  TokenizerT *tokenizer  = (TokenizerT *)malloc(sizeof(TokenizerT));
   tokenizer->delimiters  = separators;
   tokenizer->tokenStream = ts;
-  tokenizer->tokens = (char **)calloc(tsLength, sizeof(char*));
   tokenizer->numTokens = 0;
   tokenizer->numTokensDispensed = 0;
 
   char *tempDelimiters  = (char *)calloc(sepLength, sizeof(char));
   strcpy(tempDelimiters, separators);
 
-  char *tokenizedString = (char *)calloc(tsLength, sizeof(char));
+  tokenizer->tokenizedString = (char *)calloc(tsLength, sizeof(char));
+  char *tokenizedString = tokenizer->tokenizedString;
   strcpy(tokenizedString, ts);
 
   tempDelimiters  = preprocessString(tempDelimiters);
@@ -109,20 +108,39 @@ TokenizerT *TKCreate(char *separators, char *ts) {
   }
 
   char *ptr = tokenizedString;
-  int j = 0;
   for (i = 0; i < tsLength + 1; i++) {
     while (*ptr == '\0') {
       ptr++;
       i++;
     }
     if (tokenizedString[i] == '\0') {
+      tokenizer->numTokens++;
+    }
+  }
+
+  tokenizer->tokens = (char **)calloc(tokenizer->numTokens, sizeof(char*));
+  ptr = tokenizedString;
+  int j = 0;
+  size_t tokenSize = 0;
+  for (i = 0; i < tsLength + 1; i++) {
+    while (*ptr == '\0') {
+      ptr++;
+      i++;
+    }
+    tokenSize++;
+    if (tokenizedString[i] == '\0') {
+      tokenSize++;
+      /*printf("%zu ", (tokenSize)*sizeof(char));*/
+      (tokenizer->tokens)[j] = (char *)malloc((tokenSize)* sizeof(char));
       (tokenizer->tokens)[j] = ptr;
+      tokenSize = 0;
       tokenizer->numTokens++;
       ptr+=strlen(ptr);
       j++;
     }
   }
 
+  free(tempDelimiters);
   return tokenizer;
 }
 
@@ -134,6 +152,8 @@ TokenizerT *TKCreate(char *separators, char *ts) {
  */
 
 void TKDestroy(TokenizerT *tk) {
+  free(tk->tokenizedString);
+  /*free(tk->tokens);*/
   free(tk);
 }
 
